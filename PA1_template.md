@@ -1,16 +1,6 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-author: "Kevin Fowler"
-output: 
-  html_document:
-    keep_md: true
----
-```{r libraries, echo = FALSE}
-library(dplyr, warn.conflicts = FALSE)
-library(ggplot2, warn.conflicts = FALSE)
-library(gridExtra)
-library(lubridate)
-```
+# Reproducible Research: Peer Assessment 1
+Kevin Fowler  
+
 This report provides an analysis of the activity data from a personal 
 activity monitoring device. This device collected data at 5 minute
 intervals through out the day. The data consists of two months of data
@@ -33,7 +23,8 @@ The dataset was loaded into R using the code statement below. The only
 preprocessing performed was to assign the variable types of integer,
 Date and integer to the three variables described above. The variable 
 names were considered satisfactory.
-```{r sect1Code}
+
+```r
 activity <- read.csv("./activity.csv",
                      colClasses = c("integer", "Date", "integer"),
                      stringsAsFactors = FALSE)
@@ -49,7 +40,8 @@ the number of steps per day, as well as the mean and median values.
 This is the code used to summarize the data and calculate the values.
 Note that NA measurements are ignored in summarization, so days with 
 all measurements missing will have 0 steps.
-```{r sect2Code, echo = TRUE}
+
+```r
 activity_day <- 
     activity %>%
     group_by(date) %>%
@@ -61,7 +53,8 @@ median_steps <- median(activity_day$stepsTaken)
 
 The following is the histogram of the total steps each day in bins of 
 800 steps:
-```{r sect2Plot, fig.width=5, fig.height=3}
+
+```r
 sect2hist <- 
     ggplot(data = activity_day, aes(stepsTaken)) + 
     geom_histogram(binwidth = 800,
@@ -74,15 +67,19 @@ sect2hist <-
 sect2hist
 ```
 
+![](PA1_template_files/figure-html/sect2Plot-1.png) 
+
 Note the large number of days in the bin containing zero steps - this is
 an artifact of several days containing missing (NA) values.
 
 Lastly, the summary values of that distribution:
-```{r sect2Output, echo = FALSE, comment = ""}
-cat("The mean number of steps taken per day is", 
-    round(mean_steps, digits=2))
-cat("The median number of steps taken per day is", 
-    round(median_steps, digits=2))
+
+```
+The mean number of steps taken per day is 9354.23
+```
+
+```
+The median number of steps taken per day is 10395
 ```
 
 
@@ -95,7 +92,8 @@ over the 61-day measurement period.
 This is the code used to perform that summarization. Note that the mean
 statement averages only over days that have a non-NA steps value. This 
 approximation will be corrected for in a later section.
-```{r sect3Code, echo = TRUE}
+
+```r
 activity_interval <- 
     activity %>%
     group_by(interval) %>%
@@ -108,7 +106,8 @@ maxMeanStepsInterval <- filter(activity_interval,
 
 The following plot shows the mean steps across the daily interval time 
 series.
-```{r sect3Plot, fig.width=5, fig.height=3}
+
+```r
 ggplot(data = activity_interval, 
        aes(interval, meanStepsPerInterval)) + 
     geom_line() + 
@@ -121,9 +120,12 @@ ggplot(data = activity_interval,
     theme(axis.title = element_text(size=10))
 ```
 
-```{r sect3Output, echo = FALSE, comment=""}
-cat("The maximum mean steps (Blue line in plot) in a single interval \noccurred during interval", 
-    maxMeanStepsInterval)
+![](PA1_template_files/figure-html/sect3Plot-1.png) 
+
+
+```
+The maximum mean steps (Blue line in plot) in a single interval 
+occurred during interval 835
 ```
 
 
@@ -131,13 +133,18 @@ cat("The maximum mean steps (Blue line in plot) in a single interval \noccurred 
 As noted above, any NA "step" values were ignored in the summarization 
 calculations. The following code was used to determine the number of
 such missing values:
-```{r sect4Code1, echo = TRUE}
+
+```r
 numMissingStepsValues <- nrow(filter(activity, is.na(steps)))
 totalStepsValues <- nrow(activity)
 ```
-```{r sect4Output1, echo = FALSE, comment=""}
-cat("There are", numMissingStepsValues, "missing \"steps\" values in the raw data")
-cat("There are", totalStepsValues, "total \"steps\" values in the raw data")
+
+```
+There are 2304 missing "steps" values in the raw data
+```
+
+```
+There are 17568 total "steps" values in the raw data
 ```
 Since approximately 13% of the values are missing, if we can make a 
 sensible estimate of what their value would have been if measured, then
@@ -152,7 +159,8 @@ interval over all non-missing days.
 The code that performs this approximation is below. The mean values from
 the activity_interval table calculated in the previous section are used
 to set the missing values in the raw activity table:
-```{r sect4Code2, echo = TRUE}
+
+```r
 activity_approx <-
     activity %>%
     mutate(steps = ifelse(is.na(steps), 
@@ -162,7 +170,8 @@ activity_approx <-
 Now the approximated activty data is used to re-calculate the histogram
 data and mean/median number of steps that was calculated during the 
 initial exploration.
-```{r sect4Code3, echo = TRUE}
+
+```r
 activity_day_approx <- 
     activity_approx %>%
     group_by(date) %>%
@@ -176,7 +185,8 @@ This yields the following plot and values. For easy comparison, the
 original histogram based on the raw data is reproduced above the new
 one based on the approximated data (using same range on both sets of
 axes).
-```{r sect4Plot1, fig.width=5, fig.height=6}
+
+```r
 sect2hist <-
     sect2hist +
     ylim(0,14)
@@ -194,15 +204,21 @@ sect4hist <-
 grid.arrange(sect2hist, sect4hist)
 ```
 
+![](PA1_template_files/figure-html/sect4Plot1-1.png) 
+
 This effect of the approximation on this histogram was to move 8 days 
 from the first (zero) bin to the bin containing the mean number of steps. 
 Thos 8 days were ones for which no data was collected. In all other days
 there were no missing data.
 
 Lastly, the summary values of that distribution:
-```{r sect4Output2, echo = FALSE, comment = ""}
-cat("The mean number of steps taken per day is", round(mean_steps_approx, digits=2))
-cat("The median number of steps taken per day is", round(median_steps_approx, digits=2))
+
+```
+The mean number of steps taken per day is 10766.19
+```
+
+```
+The median number of steps taken per day is 10766.19
 ```
 The median is now equal to the mean, and both are greater than was the 
 case when the missing data produced 8 days with zero total steps. This
@@ -221,7 +237,8 @@ As a final step in this analysis, the activity on weekdays or weekends
 is compared. For this purpose the approximated data (activity_approx)
 is modified to have a dayType factor indicating whether it is a 
 "weekend" or a "weekday":
-```{r sect4Code4, echo = TRUE}
+
+```r
 activity_approx <-
     activity_approx %>%
     mutate(dayType = ifelse((wday(date) == 1 | wday(date) == 7), 
@@ -235,7 +252,8 @@ activity_interval_approx <-
 ```
 Then we reproduce the total steps histogram but with one panel each
 for the weekend and weekday data
-```{r sect4Plot2, fig.width=5, fig.height=6}
+
+```r
 ggplot(data = activity_interval_approx, 
        aes(interval, meanStepsPerInterval)) + 
     geom_line() + 
@@ -246,6 +264,8 @@ ggplot(data = activity_interval_approx,
     theme(plot.title = element_text(size=12)) +
     theme(axis.title = element_text(size=10))
 ```
+
+![](PA1_template_files/figure-html/sect4Plot2-1.png) 
 
 Several differences can be seen:
 
